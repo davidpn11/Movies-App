@@ -29,20 +29,20 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
+    private GridView grid;
+    final private String[] SORT_OPTIONS = {"popular","top_rated"};
 
-    private static String SORT_POPULAR = "popular";
-    private static String SORT_TOP_RATED = "top";
+    private int selected_item = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        GridView grid = (GridView) findViewById(R.id.gridview);
+        grid = (GridView) findViewById(R.id.gridview);
 
-        grid.setAdapter(new ImageAdapter(this));
 
-        new fetchMoviesAsync().execute(SORT_POPULAR);
+        new fetchMoviesAsync().execute(SORT_OPTIONS[selected_item]);
     }
 
 
@@ -58,20 +58,21 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if(id == R.id.menu_refresh){
-
+            new fetchMoviesAsync().execute(SORT_OPTIONS[selected_item]);
             return true;
         }else if (id == R.id.menu_sort){
 
             AlertDialog.Builder alt_bld = new AlertDialog.Builder(this);
             //alt_bld.setIcon(R.drawable.icon);
             alt_bld.setTitle("Sort by:");
-            final String[] sort_name = {"Popular","Top Rated"};
-            alt_bld.setSingleChoiceItems(R.array.sort_options, -1, new DialogInterface
+
+            alt_bld.setSingleChoiceItems(R.array.sort_options, selected_item, new DialogInterface
                     .OnClickListener() {
                 public void onClick(DialogInterface dialog, int item) {
-                    Toast.makeText(getApplicationContext(),
-                            "Group Name = "+sort_name[item], Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();// dismiss the alertbox after chose option
+
+                    selected_item = item;
+                    new fetchMoviesAsync().execute(SORT_OPTIONS[selected_item]);
+                    dialog.dismiss();
 
                 }
             });
@@ -116,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
             dialog.dismiss();
         }
 
-
         if (moviesDbResults != null && !moviesDbResults.equals("")) {
 
             try{
@@ -124,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray movie_array = new JSONArray(movie_set.getString("results"));
                 Log.v("Result",movie_array.length()+"");
 
+                ImageAdapter imageAdapter = new ImageAdapter(getApplicationContext(),movie_array);
+                grid.setAdapter(imageAdapter);
 
             }catch (JSONException e){
                 e.printStackTrace();

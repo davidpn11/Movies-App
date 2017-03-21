@@ -44,7 +44,7 @@ public class NetworkUtils {
 
         String endpoint = null;
 
-        if(sort.equals("top")){
+        if(sort.equals("top_rated")){
             endpoint = "/movie/top_rated";
         }else if(sort.equals("popular")){
             endpoint = "/movie/popular";
