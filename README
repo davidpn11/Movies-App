@@ -1,0 +1,8 @@
+For using this you need to create a API KEY for https://www.themoviedb.org.
+
+To do this, enter the website, create an account and add a new API key.
+Then add it to the app, on the NetworkUtils.java, you need it to change it for the call of the
+method Api_Key.getApikey().
+
+
+Aaaaand your done ;)
