@@ -60,11 +60,6 @@ public class ImageAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
 
-
-        imageView.setLayoutParams(new GridView.LayoutParams(-1, WindowManager.LayoutParams.WRAP_CONTENT));
-
-
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         try{
             final JSONObject movie_data = movies_array.getJSONObject(position);
             //Log.e("Current Movie",movie_data.toString());
@@ -72,6 +67,12 @@ public class ImageAdapter extends BaseAdapter {
 
             Picasso.with(mContext).load(BASE_POSTER_PATH+poster_path).into(imageView);
             Log.e("listerner","listener");
+
+            int height = Resources.getSystem().getDisplayMetrics().heightPixels;
+
+
+            imageView.setLayoutParams(new GridView.LayoutParams(-1, height/2));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -91,11 +92,4 @@ public class ImageAdapter extends BaseAdapter {
        // imageView.setImageResource(mThumbIds[position]);
         return imageView;
     }
-
-
-
-    // Keep all Images in array
-    public Integer[] mThumbIds = {
-            R.drawable.fight, R.drawable.inter, R.drawable.logan
-    };
 }
