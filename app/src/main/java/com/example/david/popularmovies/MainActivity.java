@@ -38,9 +38,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("Popular Movies");
 
         grid = (GridView) findViewById(R.id.gridview);
-
 
         new fetchMoviesAsync().execute(SORT_OPTIONS[selected_item]);
     }
@@ -71,6 +71,11 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int item) {
 
                     selected_item = item;
+                    if(selected_item==0){
+                        setTitle("Popular Movies");
+                    }else{
+                        setTitle("Top Rated Movies");
+                    }
                     new fetchMoviesAsync().execute(SORT_OPTIONS[selected_item]);
                     dialog.dismiss();
 
