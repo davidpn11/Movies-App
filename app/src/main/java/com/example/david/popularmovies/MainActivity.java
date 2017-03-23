@@ -105,14 +105,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected String doInBackground(String... params) {
         URL movieUrl = NetworkUtils.buildUrl(params[0]);
-        Log.v("URL",movieUrl.toString());
         String moviesDbResults = null;
         try {
             moviesDbResults = NetworkUtils.getResponseFromHttpUrl(movieUrl);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.v("Result",moviesDbResults);
+        Log.d("Result",moviesDbResults);
         return moviesDbResults;
     }
 
@@ -127,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
             try{
                 JSONObject movie_set = new JSONObject(moviesDbResults);
                 JSONArray movie_array = new JSONArray(movie_set.getString("results"));
-                Log.v("Result",movie_array.length()+"");
 
                 ImageAdapter imageAdapter = new ImageAdapter(getApplicationContext(),movie_array);
                 grid.setAdapter(imageAdapter);
