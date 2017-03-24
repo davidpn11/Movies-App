@@ -57,11 +57,11 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
 
-    public void setPoster(ImageView poster_image, String poster_path){
+    private void setPoster(ImageView poster_image, String poster_path){
         Picasso.with(this).load(BASE_POSTER_PATH+poster_path).into(poster_image);
     }
 
-    public String getDate(String date){
+    private String getDate(String date){
 
         String year = date.substring(0,4);
         String month = date.substring(5,7);

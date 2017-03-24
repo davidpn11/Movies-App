@@ -4,12 +4,15 @@
     <string name="menu_sort">Sort</string>
     <string name="details_release">Release Date:</string>
     <string name="details_rate">Rating:</string>
+    <string name="movie_poster">Movie Poster</string>
 
     <!--Sort option strings-->
-    <string name="sort_popular">Popular</string>
-    <string name="sort_top_rated">Top Rated</string>
     <array name="sort_options">
         <item>Popular</item>
         <item>Top Rated</item>
     </array>
+
+
+    <string name="sort_popular">Popular</string>
+    <string name="sort_top_rated">Top Rated</string>
 </resources>
