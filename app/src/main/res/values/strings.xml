@@ -5,6 +5,8 @@
     <string name="details_release">Release Date:</string>
     <string name="details_rate">Rating:</string>
     <string name="movie_poster">Movie Poster</string>
+    <string name="reviews_header">Reviews</string>
+    <string name="trailers_header">Trailers</string>
 
     <!--Sort option strings-->
     <array name="sort_options">

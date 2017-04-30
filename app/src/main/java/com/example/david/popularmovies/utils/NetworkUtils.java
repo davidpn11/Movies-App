@@ -1,4 +1,4 @@
-package com.example.david.popularmovies;
+package com.example.david.popularmovies.utils;
 
 /*
  * Copyright (C) 2016 The Android Open Source Project
@@ -18,7 +18,6 @@ package com.example.david.popularmovies;
 
         import android.net.Uri;
         import android.util.Log;
-        import android.widget.Toast;
 
         import java.io.IOException;
         import java.io.InputStream;
@@ -40,7 +39,7 @@ public class NetworkUtils {
 
 
 
-    public static URL buildUrl(String sort) {
+    public static URL buildBaseUrl(String sort) {
 
         String endpoint = null;
 
@@ -49,6 +48,25 @@ public class NetworkUtils {
         }else if(sort.equals("popular")){
             endpoint = "/movie/popular";
         }
+
+
+
+        Uri builtUri = Uri.parse(MOVIESDB_BASE_URL+endpoint).buildUpon()
+                .appendQueryParameter(API_KEY, Api_Key.getApiKey())
+                .build();
+        Log.e("URL",builtUri.toString());
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return url;
+    }
+
+    public static URL buildReviewsUrl(String id) {
+
+        String endpoint = "/movie/"+id+"/reviews";
 
         Uri builtUri = Uri.parse(MOVIESDB_BASE_URL+endpoint).buildUpon()
                 .appendQueryParameter(API_KEY, Api_Key.getApiKey())
@@ -62,6 +80,25 @@ public class NetworkUtils {
         }
         return url;
     }
+
+
+    public static URL buildTrailersUrl(String id) {
+
+        String endpoint = "/movie/"+id+"/trailers";
+
+        Uri builtUri = Uri.parse(MOVIESDB_BASE_URL+endpoint).buildUpon()
+                .appendQueryParameter(API_KEY, Api_Key.getApiKey())
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return url;
+    }
+
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
