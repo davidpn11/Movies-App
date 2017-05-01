@@ -1,24 +1,28 @@
 package com.example.david.popularmovies.ui;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.david.popularmovies.R;
-import com.example.david.popularmovies.adapter.GridAdapter;
 import com.example.david.popularmovies.adapter.ReviewAdapter;
 import com.example.david.popularmovies.adapter.TrailerAdapter;
+import com.example.david.popularmovies.utils.FavoritesUtils;
 import com.example.david.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
-
+import com.example.david.popularmovies.db.FavoritesContract.FavoritesEntry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,9 +43,11 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.post_image) ImageView poster_image;
     @BindView(R.id.reviews_recyclerview) RecyclerView reviewsRecyclerView;
     @BindView(R.id.trailer_recyclerview) RecyclerView trailersRecyclerView;
-
+    private MenuItem favoriteIcon;
+    private boolean isFavorite;
     final private String BASE_POSTER_PATH = "http://image.tmdb.org/t/p/w185//";
     private JSONObject movie_obj;
+
     private JSONArray mMovieReviews,mMoviesTrailers;
 
     @Override
@@ -61,9 +67,10 @@ public class DetailsActivity extends AppCompatActivity {
                     LinearLayoutManager.HORIZONTAL, false);
             reviewsRecyclerView.setLayoutManager(reviewsLayoutManager);
             trailersRecyclerView.setLayoutManager(trailersLayoutManager);
-
+            FavoritesUtils.getAllData(this);
             new fetchReviewsAsync().execute(movie_obj.getString("id"));
             new fetchTrailersAsync().execute(movie_obj.getString("id"));
+
 
         }catch (JSONException e){
             e.printStackTrace();
@@ -71,6 +78,84 @@ public class DetailsActivity extends AppCompatActivity {
             finish();
         }
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_details,menu);
+        favoriteIcon = menu.findItem(R.id.menu_favorite);
+        checkFavorite();
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+
+        if(id == R.id.menu_favorite){
+            if(isFavorite){
+                deleteFavorite();
+                isFavorite = false;
+            }else{
+                addFavorite();
+                isFavorite = true;
+            }
+
+        }
+        return true;
+    }
+
+    public void checkFavorite(){
+        try{
+            if(FavoritesUtils.checkFavorite(this,movie_obj.getString("id"))){
+                favoriteIcon.setIcon(R.mipmap.ic_favorite);
+                isFavorite = true;
+            }else{
+                isFavorite = false;
+            }
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public void addFavorite(){
+        ContentValues contentValues = new ContentValues();
+        try{
+            contentValues.put(FavoritesEntry.COlUMN_MOVIE_ID,movie_obj.getString("id"));
+            contentValues.put(FavoritesEntry.COLUMN_TITLE,movie_obj.getString("original_title"));
+            contentValues.put(FavoritesEntry.COLUMN_VOTE_AVERAGE,movie_obj.getString("vote_average"));
+            contentValues.put(FavoritesEntry.COLUMN_RELEASE_DATE,movie_obj.getString("release_date"));
+            contentValues.put(FavoritesEntry.COLUMN_POSTER_PATH,movie_obj.getString("poster_path"));
+            Uri uri = getContentResolver().insert(FavoritesEntry.CONTENT_URI, contentValues);
+            if(uri != null){
+                Toast.makeText(this, "Movie added to Favorites!", Toast.LENGTH_SHORT).show();
+            }
+            favoriteIcon.setIcon(R.mipmap.ic_favorite);
+        }catch (JSONException e){
+            e.printStackTrace();
+
+        }
+
+    }
+
+
+    public void deleteFavorite(){
+        try{
+            String stringId = movie_obj.getString("id");
+            Uri uri = FavoritesEntry.CONTENT_URI;
+            uri = uri.buildUpon().appendPath(stringId).build();
+            getContentResolver().delete(uri, null, null);
+            favoriteIcon.setIcon(R.mipmap.ic_favorite_border);
+            Toast.makeText(this, "Movie deleted from Favorites!", Toast.LENGTH_SHORT).show();
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+
+    }
+
 
     private void setMovieDetails(){
         try{
@@ -101,7 +186,7 @@ public class DetailsActivity extends AppCompatActivity {
         return  month+"/"+day+"/"+year;
     }
 
-    class fetchReviewsAsync extends AsyncTask<String, Void, String> {
+    private class fetchReviewsAsync extends AsyncTask<String, Void, String> {
 
 
             public ProgressDialog dialog = new ProgressDialog(DetailsActivity.this);
@@ -154,7 +239,7 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
 
-    class fetchTrailersAsync extends AsyncTask<String, Void, String> {
+    private class fetchTrailersAsync extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {

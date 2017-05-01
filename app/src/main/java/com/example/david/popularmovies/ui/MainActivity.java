@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,9 +47,11 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         setTitle("Popular Movies");
         ButterKnife.bind(this);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+       // Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(mToolbar);
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher);
-
+        //Toolbar toolbar =
 
 
         mMoviesArray = new JSONArray();

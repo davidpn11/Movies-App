@@ -19,7 +19,15 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.DetailsActivity"
-            android:parentActivityName=".ui.MainActivity"></activity>
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.MainActivity" />
+        </activity>
+        <provider
+            android:name="com.example.david.popularmovies.db.FavoritesProvider"
+            android:authorities="com.example.david.popularmovies"
+            android:exported="false"/>
     </application>
 
 </manifest>
