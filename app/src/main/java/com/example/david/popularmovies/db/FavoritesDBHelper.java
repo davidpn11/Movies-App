@@ -8,7 +8,7 @@ import com.example.david.popularmovies.db.FavoritesContract.FavoritesEntry;
 public final class FavoritesDBHelper extends SQLiteOpenHelper{
 
     private static final String DATABASE_NAME = "favoritesDb.db";
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
 
     FavoritesDBHelper(Context context){
@@ -17,11 +17,12 @@ public final class FavoritesDBHelper extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        final String CREATE_TABLE = "CREATE TABLE "  + FavoritesEntry.TABLE_NAME + " (" +
+        final String CREATE_TABLE = "CREATE TABLE " + FavoritesEntry.TABLE_NAME + " (" +
                 FavoritesEntry.COlUMN_MOVIE_ID + " INTEGER PRIMARY KEY, " +
                 FavoritesEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
                 FavoritesEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
                 FavoritesEntry.COLUMN_VOTE_AVERAGE + " TEXT NOT NULL, " +
+                FavoritesEntry.COLUMN_OVERVIEW + " TEXT NOT NULL, " +
                 FavoritesEntry.COLUMN_POSTER_PATH  + " TEXT NOT NULL);";
 
         db.execSQL(CREATE_TABLE);
@@ -29,7 +30,7 @@ public final class FavoritesDBHelper extends SQLiteOpenHelper{
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS" + FavoritesEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + FavoritesEntry.TABLE_NAME);
         onCreate(db);
     }
 }

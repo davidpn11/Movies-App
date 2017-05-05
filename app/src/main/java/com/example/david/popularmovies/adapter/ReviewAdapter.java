@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.david.popularmovies.R;
+import com.example.david.popularmovies.model.Review;
 import com.example.david.popularmovies.ui.DetailsActivity;
 import com.squareup.picasso.Picasso;
 
@@ -22,18 +23,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by david on 25/04/17.
  */
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder> {
 
-    private JSONArray reviews_array;
-    private Context mContext;
+    private ArrayList<Review> reviewList;
 
-    public ReviewAdapter(Context context,JSONArray reviews_array) {
-        this.reviews_array = reviews_array;
-        this.mContext = context;
+    public ReviewAdapter(ArrayList<Review> reviews_array) {
+        this.reviewList = reviews_array;
     }
 
     @Override
@@ -47,45 +51,34 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        try {
-            final JSONObject review_data = reviews_array.getJSONObject(position);
-            holder.bindReviewData(review_data,mContext);
-
-
-        }catch (JSONException e) {
-            e.printStackTrace();
-        }
+            holder.bindReviewData(reviewList.get(position));
     }
+
 
     @Override
     public int getItemCount() {
 
-        return reviews_array.length();
+        return reviewList.size();
 
     }
-
-
+    public void setReviewList(ArrayList<Review> reviews){
+        reviewList = reviews;
+    }
 
     class ViewHolder extends RecyclerView.ViewHolder{
 
-
-        //private CardView card_view;
-        private TextView review_author,review_content;
+        @BindView(R.id.review_author) TextView review_author;
+        @BindView(R.id.review_content) TextView review_content;
 
         public ViewHolder(View itemView) {
             super(itemView);
-
-            //card_view = (CardView) itemView.findViewById(R.id.cv);
-            review_author= (TextView) itemView.findViewById(R.id.review_author);
-            review_content= (TextView) itemView.findViewById(R.id.review_content);
+            ButterKnife.bind(this,itemView);
         }
 
-        public void bindReviewData(JSONObject data,Context mContext){
+        public void bindReviewData(Review data){
             try{
-                review_author.setText(data.getString("author"));
-                review_content.setText(data.getString("content"));
-            }catch (JSONException e){
-                e.printStackTrace();
+                review_author.setText(data.author());
+                review_content.setText(data.content());
             }catch (Exception e){
                 e.printStackTrace();
             }

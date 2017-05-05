@@ -17,6 +17,7 @@ package com.example.david.popularmovies.utils;
  */
 
         import android.net.Uri;
+
         import android.util.Log;
 
         import java.io.IOException;
@@ -35,7 +36,7 @@ public class NetworkUtils {
             "http://api.themoviedb.org/3";
 
     final static String API_KEY = "api_key";
-
+    private static final String API_KEY_VALUE = com.example.david.popularmovies.BuildConfig.API_KEY;
 
 
 
@@ -52,7 +53,7 @@ public class NetworkUtils {
 
 
         Uri builtUri = Uri.parse(MOVIESDB_BASE_URL+endpoint).buildUpon()
-                .appendQueryParameter(API_KEY, Api_Key.getApiKey())
+                .appendQueryParameter(API_KEY, API_KEY_VALUE)
                 .build();
         Log.e("URL",builtUri.toString());
         URL url = null;
@@ -69,7 +70,7 @@ public class NetworkUtils {
         String endpoint = "/movie/"+id+"/reviews";
 
         Uri builtUri = Uri.parse(MOVIESDB_BASE_URL+endpoint).buildUpon()
-                .appendQueryParameter(API_KEY, Api_Key.getApiKey())
+                .appendQueryParameter(API_KEY, API_KEY_VALUE)
                 .build();
 
         URL url = null;
@@ -87,7 +88,7 @@ public class NetworkUtils {
         String endpoint = "/movie/"+id+"/trailers";
 
         Uri builtUri = Uri.parse(MOVIESDB_BASE_URL+endpoint).buildUpon()
-                .appendQueryParameter(API_KEY, Api_Key.getApiKey())
+                .appendQueryParameter(API_KEY, API_KEY_VALUE)
                 .build();
 
         URL url = null;

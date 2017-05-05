@@ -18,12 +18,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.david.popularmovies.R;
+import com.example.david.popularmovies.model.Trailer;
 import com.example.david.popularmovies.ui.DetailsActivity;
+import com.example.david.popularmovies.ui.MainActivity;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by david on 25/04/17.
@@ -31,11 +38,11 @@ import org.json.JSONObject;
 
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHolder> {
 
-    private JSONArray trailers_array;
+    private ArrayList<Trailer> trailerList;
     private Context mContext;
 
-    public TrailerAdapter(Context context,JSONArray trailers_array) {
-        this.trailers_array = trailers_array;
+    public TrailerAdapter(Context context,ArrayList<Trailer> trailers_array) {
+        this.trailerList = trailers_array;
         this.mContext = context;
     }
 
@@ -46,54 +53,42 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
         ViewHolder rcv = new ViewHolder(layoutView);
         return rcv;
     }
-
-
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        try {
-            final JSONObject trailer_data = trailers_array.getJSONObject(position);
-            holder.bindReviewData(trailer_data,mContext);
-
-
-        }catch (JSONException e) {
-            e.printStackTrace();
-        }
+            holder.bindTrailerData(trailerList.get(position),mContext);
     }
 
     @Override
     public int getItemCount() {
 
-        return trailers_array.length();
+        return trailerList.size();
 
+    }
+
+    public void setTrailerList(ArrayList<Trailer> reviews){
+        trailerList = reviews;
     }
 
 
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-
-        //private CardView card_view;
-
-        private ImageView trailer_thumbnail;
-        private JSONObject trailer_data;
+        @BindView(R.id.trailer_thumbnail) ImageView trailer_thumbnail;
+        Trailer trailer;
         Context mContext;
         public ViewHolder(View itemView) {
             super(itemView);
-
-            //card_view = (CardView) itemView.findViewById(R.id.cv);
-            trailer_thumbnail= (ImageView) itemView.findViewById(R.id.trailer_thumbnail);
+            ButterKnife.bind(this,itemView);
             trailer_thumbnail.setOnClickListener(this);
         }
 
-        public void bindReviewData(JSONObject data,Context context){
+        public void bindTrailerData(Trailer data,Context context){
             try{
                 mContext = context;
-                trailer_data = data;
-                String thumbnail = generateThumbnail(trailer_data.getString("source"));
+                trailer = data;
+                String thumbnail = generateThumbnail(trailer.source());
                 Picasso.with(mContext).load(thumbnail).into(trailer_thumbnail);
 
-            }catch (JSONException e){
-                e.printStackTrace();
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -114,9 +109,9 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
         @Override
         public void onClick(View view) {
 
-            if(trailer_data != null){
+            if(trailer != null){
                 try {
-                    watchYoutubeVideo(trailer_data.getString("source"));
+                    watchYoutubeVideo(trailer.source());
                 }catch (Exception e){
                     e.printStackTrace();
                 }

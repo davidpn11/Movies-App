@@ -12,6 +12,7 @@ import android.net.Uri;
 import com.example.david.popularmovies.db.FavoritesContract.FavoritesEntry;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 public class FavoritesProvider extends ContentProvider {
 
@@ -77,7 +78,6 @@ public class FavoritesProvider extends ContentProvider {
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
         final SQLiteDatabase db = favoritesDBHelper.getWritableDatabase();
-
         int match = sUriMatcher.match(uri);
         Uri returnUri;
 

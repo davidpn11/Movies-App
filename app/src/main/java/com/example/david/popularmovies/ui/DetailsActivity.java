@@ -9,16 +9,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.david.popularmovies.R;
 import com.example.david.popularmovies.adapter.ReviewAdapter;
 import com.example.david.popularmovies.adapter.TrailerAdapter;
+import com.example.david.popularmovies.model.Movie;
+import com.example.david.popularmovies.model.Review;
+import com.example.david.popularmovies.model.Trailer;
 import com.example.david.popularmovies.utils.FavoritesUtils;
 import com.example.david.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
@@ -29,6 +35,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,38 +48,57 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.reviews_header) TextView reviews_header;
     @BindView(R.id.trailers_header) TextView trailers_header;
     @BindView(R.id.post_image) ImageView poster_image;
+    @BindView(R.id.trailer_progressbar) ProgressBar trailer_progressbar;
+    @BindView(R.id.reviews_progressbar) ProgressBar reviews_progressbar;
     @BindView(R.id.reviews_recyclerview) RecyclerView reviewsRecyclerView;
     @BindView(R.id.trailer_recyclerview) RecyclerView trailersRecyclerView;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
     private MenuItem favoriteIcon;
     private boolean isFavorite;
     final private String BASE_POSTER_PATH = "http://image.tmdb.org/t/p/w185//";
-    private JSONObject movie_obj;
+    private Movie mMovie;
 
-    private JSONArray mMovieReviews,mMoviesTrailers;
+    private ArrayList<Review> mReviewList;
+    private ArrayList<Trailer> mTrailerList;
+
+    private ReviewAdapter reviewAdapter;
+    private TrailerAdapter trailerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         ButterKnife.bind(this);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Intent it = getIntent();
-        String movie_data = it.getStringExtra("movie_data");
-
+        Bundle b = it.getExtras();
+        if (b != null) {
+            mMovie = b.getParcelable("movie_data");
+        }
         try{
-            movie_obj = new JSONObject(movie_data);
             setMovieDetails();
             LinearLayoutManager reviewsLayoutManager = new LinearLayoutManager(this);
             LinearLayoutManager trailersLayoutManager = new LinearLayoutManager(this,
                     LinearLayoutManager.HORIZONTAL, false);
             reviewsRecyclerView.setLayoutManager(reviewsLayoutManager);
             trailersRecyclerView.setLayoutManager(trailersLayoutManager);
-            FavoritesUtils.getAllData(this);
-            new fetchReviewsAsync().execute(movie_obj.getString("id"));
-            new fetchTrailersAsync().execute(movie_obj.getString("id"));
+
+            mReviewList = new ArrayList<>();
+            reviewAdapter = new ReviewAdapter(mReviewList);
+
+            mTrailerList = new ArrayList<>();
+            trailerAdapter = new TrailerAdapter(getApplicationContext(),mTrailerList);
+
+            reviewsRecyclerView.setAdapter(reviewAdapter);
+            trailersRecyclerView.setAdapter(trailerAdapter);
+
+            new fetchReviewsAsync().execute(mMovie.id());
+            new fetchTrailersAsync().execute(mMovie.id());
 
 
-        }catch (JSONException e){
+        }catch (Exception e){
             e.printStackTrace();
             Toast.makeText(this, "Something went wrong!", Toast.LENGTH_SHORT).show();
             finish();
@@ -92,7 +118,6 @@ public class DetailsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-
         if(id == R.id.menu_favorite){
             if(isFavorite){
                 deleteFavorite();
@@ -108,66 +133,51 @@ public class DetailsActivity extends AppCompatActivity {
 
     public void checkFavorite(){
         try{
-            if(FavoritesUtils.checkFavorite(this,movie_obj.getString("id"))){
+            if(FavoritesUtils.checkFavorite(this,mMovie.id())){
                 favoriteIcon.setIcon(R.mipmap.ic_favorite);
                 isFavorite = true;
             }else{
                 isFavorite = false;
             }
-        }catch (JSONException e){
+        }catch (Exception e){
             e.printStackTrace();
         }
     }
-
-
 
     public void addFavorite(){
-        ContentValues contentValues = new ContentValues();
-        try{
-            contentValues.put(FavoritesEntry.COlUMN_MOVIE_ID,movie_obj.getString("id"));
-            contentValues.put(FavoritesEntry.COLUMN_TITLE,movie_obj.getString("original_title"));
-            contentValues.put(FavoritesEntry.COLUMN_VOTE_AVERAGE,movie_obj.getString("vote_average"));
-            contentValues.put(FavoritesEntry.COLUMN_RELEASE_DATE,movie_obj.getString("release_date"));
-            contentValues.put(FavoritesEntry.COLUMN_POSTER_PATH,movie_obj.getString("poster_path"));
-            Uri uri = getContentResolver().insert(FavoritesEntry.CONTENT_URI, contentValues);
-            if(uri != null){
-                Toast.makeText(this, "Movie added to Favorites!", Toast.LENGTH_SHORT).show();
-            }
+        if(FavoritesUtils.addFavorite(getApplicationContext(),mMovie)){
             favoriteIcon.setIcon(R.mipmap.ic_favorite);
-        }catch (JSONException e){
-            e.printStackTrace();
-
+            Toast.makeText(this, "Movie added to Favorites!", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, "Something went wrong!", Toast.LENGTH_SHORT).show();
         }
-
     }
-
 
     public void deleteFavorite(){
         try{
-            String stringId = movie_obj.getString("id");
-            Uri uri = FavoritesEntry.CONTENT_URI;
-            uri = uri.buildUpon().appendPath(stringId).build();
-            getContentResolver().delete(uri, null, null);
-            favoriteIcon.setIcon(R.mipmap.ic_favorite_border);
-            Toast.makeText(this, "Movie deleted from Favorites!", Toast.LENGTH_SHORT).show();
-        }catch (JSONException e){
+            String stringId = mMovie.id();
+            if(FavoritesUtils.deleteFavorite(this,stringId)){
+                favoriteIcon.setIcon(R.mipmap.ic_favorite_border);
+                Toast.makeText(this,"Movie deleted to Favorites!", Toast.LENGTH_SHORT).show();
+            }else{
+                Toast.makeText(this,"Something went wrong!", Toast.LENGTH_SHORT).show();
+            }
+        }catch (Exception e){
             e.printStackTrace();
         }
-
     }
-
 
     private void setMovieDetails(){
         try{
-            String rating_text = movie_obj.getString("vote_average")+"/10";
+            String rating_text = mMovie.voteAverage()+"/10";
 
-            String date = getDate(movie_obj.getString("release_date"));
-            setTitle(movie_obj.getString("original_title"));
+            String date = getDate(mMovie.releaseDate());
+            setTitle(mMovie.title());
             rating.setText(rating_text);
             release_date.setText(date);
-            sinopsis.setText(movie_obj.getString("overview"));
-            setPoster(poster_image, movie_obj.getString("poster_path"));
-        }catch (JSONException e){
+            sinopsis.setText(mMovie.overview());
+            setPoster(poster_image, mMovie.posterPath());
+        }catch (Exception e){
             e.printStackTrace();
         }
     }
@@ -186,16 +196,47 @@ public class DetailsActivity extends AppCompatActivity {
         return  month+"/"+day+"/"+year;
     }
 
+
+    private ArrayList<Review> getReviews(JSONArray reviews){
+        JSONObject obj;
+        ArrayList<Review> list = new ArrayList<>();
+        try{
+            for(int i = 0; i < reviews.length();i++){
+                obj = reviews.getJSONObject(i);
+                list.add(Review.create(obj.getString("author"),obj.getString("content")));
+            }
+            return list;
+
+        }catch (JSONException e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    private ArrayList<Trailer> getTrailers(JSONArray trailers){
+        JSONObject obj;
+        ArrayList<Trailer> list = new ArrayList<>();
+        try{
+            for(int i = 0; i < trailers.length();i++){
+                obj = trailers.getJSONObject(i);
+                list.add(Trailer.create(obj.getString("source")));
+            }
+            return list;
+
+        }catch (JSONException e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
     private class fetchReviewsAsync extends AsyncTask<String, Void, String> {
-
-
-            public ProgressDialog dialog = new ProgressDialog(DetailsActivity.this);
 
 
             @Override
             protected void onPreExecute() {
-                this.dialog.setMessage("Please Wait...");
-                this.dialog.show();
+                reviews_progressbar.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -213,22 +254,20 @@ public class DetailsActivity extends AppCompatActivity {
 
         protected void onPostExecute(String moviesDbResults) {
 
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
+            reviews_progressbar.setVisibility(View.GONE);
 
             if (moviesDbResults != null && !moviesDbResults.equals("")) {
 
                 try{
-                    Log.v("REVIEWS",moviesDbResults);
                     JSONObject movie_set = new JSONObject(moviesDbResults);
 
-                    mMovieReviews = new JSONArray(movie_set.getString("results"));
-                    if(mMovieReviews.length()> 0) {
-                        ReviewAdapter reviewAdapter = new ReviewAdapter(getApplicationContext(), mMovieReviews);
-                        reviewsRecyclerView.setAdapter(reviewAdapter);
+                    mReviewList = getReviews(new JSONArray(movie_set.getString("results")));
+                    if(mReviewList.size()> 0) {
+                        reviewAdapter.setReviewList(mReviewList);
+                        reviewAdapter.notifyDataSetChanged();
+
                     }else{
-                        reviews_header.setText("This movie don't have reviews!");
+                        reviews_header.setText(getResources().getString(R.string.no_reviews));
                     }
 
                 }catch (JSONException e){
@@ -242,6 +281,12 @@ public class DetailsActivity extends AppCompatActivity {
     private class fetchTrailersAsync extends AsyncTask<String, Void, String> {
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            trailer_progressbar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected String doInBackground(String... params) {
             URL movieReviewUrl = NetworkUtils.buildTrailersUrl(params[0]);
             String moviesDbResults = null;
@@ -250,28 +295,25 @@ public class DetailsActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Log.d("Result",moviesDbResults);
+            Log.d("results",moviesDbResults);
             return moviesDbResults;
         }
 
         protected void onPostExecute(String moviesDbResults) {
 
+            trailer_progressbar.setVisibility(View.GONE);
+
             if (moviesDbResults != null && !moviesDbResults.equals("")) {
 
                 try{
-                    Log.v("TRAILERS",moviesDbResults);
                     JSONObject movie_set = new JSONObject(moviesDbResults);
-
-                    mMoviesTrailers = new JSONArray(movie_set.getString("youtube"));
-
-                    if(mMoviesTrailers.length() > 0) {
-                        TrailerAdapter trailerAdapter = new TrailerAdapter(getApplicationContext(), mMoviesTrailers);
-                        trailersRecyclerView.setAdapter(trailerAdapter);
+                      mTrailerList = getTrailers(new JSONArray(movie_set.getString("youtube")));
+                    if(mTrailerList.size() > 0) {
+                        trailerAdapter.setTrailerList(mTrailerList);
+                        trailerAdapter.notifyDataSetChanged();
                     }else{
-                        trailers_header.setText("This movie don't have trailers!");
+                        trailers_header.setText(getResources().getString(R.string.no_trailers));
                     }
-
-
 
                 }catch (JSONException e){
                     e.printStackTrace();
