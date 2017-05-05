@@ -1,8 +1,11 @@
 For using this you need to create a API KEY for https://www.themoviedb.org.
 
-To do this, enter the website, create an account and add a new API key.
-Then add it to the app, on the NetworkUtils.java, you need it to change it for the call of the
-method Api_Key.getApikey().
+To do this, enter the website, create an account and create an API key.
+Then add your API key to gradle.properties as:
+API_KEY = “abcdef”
+
+To access in code, go to NetworkUtils.java and add:
+private static final String API_KEY = BuildConfig.API_KEY; 
 
 
-Aaaaand your done ;)
+And you’re done ;)
