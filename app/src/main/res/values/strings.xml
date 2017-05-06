@@ -3,12 +3,18 @@
     <string name="menu_refresh">Refresh</string>
     <string name="menu_favorite">Favorite</string>
     <string name="menu_sort">Sort</string>
+    <string name="menu_share">Share</string>
     <string name="details_release">Release Date:</string>
     <string name="details_rate">Rating:</string>
     <string name="movie_poster">Movie Poster</string>
     <string name="reviews_header">Reviews</string>
     <string name="trailers_header">Trailers</string>
     <string name="shared_pref_sort">SORT</string>
+
+    <string name="error_string">Something went wrong!</string>
+    <string name="movie_added">Movie added to favorites!</string>
+    <string name="movie_deleted">Movie deleted from favorites!</string>
+    <string name="share_string">Share</string>
 
     <!--Sort option strings-->
     <array name="sort_options">

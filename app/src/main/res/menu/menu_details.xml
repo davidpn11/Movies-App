@@ -8,5 +8,12 @@
         android:icon="@mipmap/ic_favorite_border"
         android:title="@string/menu_favorite"
         />
+    <item
+        android:id="@+id/menu_share"
+        android:orderInCategory="1"
+        app:showAsAction="ifRoom"
+        android:icon="@mipmap/ic_share"
+        android:title="@string/menu_share"
+        />
 
 </menu>

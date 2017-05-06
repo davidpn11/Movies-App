@@ -100,7 +100,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         }catch (Exception e){
             e.printStackTrace();
-            Toast.makeText(this, "Something went wrong!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.error_string), Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -116,6 +116,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         int id = item.getItemId();
 
         if(id == R.id.menu_favorite){
@@ -126,9 +127,22 @@ public class DetailsActivity extends AppCompatActivity {
                 addFavorite();
                 isFavorite = true;
             }
-
         }
-        return true;
+        if(id == R.id.menu_share){
+            shareMovieTrailer();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void shareMovieTrailer(){
+        Trailer t = mTrailerList.get(0);
+        String url = "http://www.youtube.com/watch?v" + t.source();
+        String msg = "Hey! Check out this trailer: "+url;
+        Intent it = new Intent(android.content.Intent.ACTION_SEND);
+        it.setType("text/plain");
+        it.putExtra(android.content.Intent.EXTRA_SUBJECT, "Popular Movies");
+        it.putExtra(android.content.Intent.EXTRA_TEXT, msg);
+        startActivity(Intent.createChooser(it,getResources().getString(R.string.share_string)));
     }
 
     public void checkFavorite(){
@@ -147,9 +161,9 @@ public class DetailsActivity extends AppCompatActivity {
     public void addFavorite(){
         if(FavoritesUtils.addFavorite(getApplicationContext(),mMovie)){
             favoriteIcon.setIcon(R.mipmap.ic_favorite);
-            Toast.makeText(this, "Movie added to Favorites!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.movie_added), Toast.LENGTH_SHORT).show();
         }else{
-            Toast.makeText(this, "Something went wrong!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.error_string), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -158,9 +172,9 @@ public class DetailsActivity extends AppCompatActivity {
             String stringId = mMovie.id();
             if(FavoritesUtils.deleteFavorite(this,stringId)){
                 favoriteIcon.setIcon(R.mipmap.ic_favorite_border);
-                Toast.makeText(this,"Movie deleted to Favorites!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,getResources().getString(R.string.movie_deleted), Toast.LENGTH_SHORT).show();
             }else{
-                Toast.makeText(this,"Something went wrong!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,getResources().getString(R.string.error_string), Toast.LENGTH_SHORT).show();
             }
         }catch (Exception e){
             e.printStackTrace();
